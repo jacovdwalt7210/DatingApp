@@ -20,7 +20,7 @@ export class NavComponent implements OnInit {
     private toastr: ToastrService) { }
 
   ngOnInit(): void {
-    
+
   }
 
   login() {
@@ -31,9 +31,6 @@ export class NavComponent implements OnInit {
         console.log(response);
         this.toastr.success('Login Successful');
         this.router.navigateByUrl('/members')
-      }, error => {
-          console.log(error);
-          this.toastr.error(error.error);
       });
   }
 
