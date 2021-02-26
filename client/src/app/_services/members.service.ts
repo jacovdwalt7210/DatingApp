@@ -1,7 +1,13 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { of } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { Member } from '../_modules/member';
+
+// services are singleton
+// services are ideal for storing state
+// can use 3rd party tools like Redux or Mobex
 
 // const httpOptions = {
 //   headers: new HttpHeaders({
@@ -15,14 +21,42 @@ import { Member } from '../_modules/member';
 export class MembersService {
 
   baseUrl = environment.apiUrl;
+  members: Member[] = [];
 
   constructor(private http: HttpClient) { }
 
   getMembers() {
-    return this.http.get<Member[]>(this.baseUrl + 'users'); //, httpOptions);
+    if (this.members.length > 0) {
+      return of(this.members);
+    }
+
+    return this.http
+      .get<Member[]>(this.baseUrl + 'users')
+      .pipe(
+        map(members => {
+          this.members = members;
+          return members;
+        })
+      )
   }
 
   getMember(username: string) {
+
+    const member = this.members.find(u => u.username === username);
+    if (member !== undefined) {
+      return of(member);
+    }
     return this.http.get<Member>(this.baseUrl + 'users/' + username);  //, httpOptions);
+  }
+
+  updateMember(member: Member) {
+    return this.http
+      .put(this.baseUrl + 'users', member)
+      .pipe(
+        map(() => {
+          const index = this.members.indexOf(member);
+          this.members[index] = member;
+        })
+      );
   }
 }
